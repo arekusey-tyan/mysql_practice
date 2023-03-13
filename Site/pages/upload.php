@@ -19,7 +19,9 @@ if (!empty($f['file']['tmp_name'])) {
 }
 
 ?>
-
+<a href='/Site/pages/show.php'>Show image</a> |&nbsp;<a href='/Site'>Home page</a>
+<br>
+<hr>
 <form method='post' enctype="multipart/form-data">
     <input type='file' name='file' />
     <button>Submit</button>
