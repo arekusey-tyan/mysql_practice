@@ -1,23 +1,27 @@
 <?php
+require('../config/db.php');
+require('../utils/functions.php');
 
-require ('../config/db.php');
-
-$files = $dbh->query('SELECT * FROM `pictures`;')->fetchAll(PDO::FETCH_ASSOC);
+$files = getFiles()
 
 ?>
-<a href='/Site/pages/upload.php'>Upload image</a> |&nbsp;<a href='/Site'>Home page</a>
-<br>
-<hr>
-<form method='get'>
+
+<a href='/Site/pages/upload.php'>Upload image</a> |&nbsp;<a href='/Site'>Home page</a> | <a href="/Site/pages/showpictures.php">Show pictures</a>
+
+<br />
+<hr />
+
+<form>
     <select name='pic_id'>
-        <option disabled <?= (empty($_GET['pic_id'])) ? 'selected' : ''; ?>>Выберите изображение</option>
-    <?php
-    foreach ($files as $file) {
-        ?>
-        <option <?= (!empty($_GET['pic_id']) && $file['id'] == $_GET['pic_id']) ? 'selected' : ''; ?> value="<?= $file['id']; ?>"><?= $file['pic_name']; ?>
-        <?php
-    }
-    ?>
+        <option disabled <?= (empty($_GET['pic_id'])) ? 'selected' : false; ?>>
+            Выберите изображение
+        </option>
+
+        <?php foreach ($files as $file) { ?>
+            <option value="<?= $file['id']; ?>" <?= (!empty($_GET['pic_id']) && $file['id'] == $_GET['pic_id']) ? 'selected' : ''; ?>>
+                <?= $file['pic_name']; ?>
+            </option>
+        <?php } ?>
     </select>
     <button type="submit">Submit</button>
 </form>
@@ -25,24 +29,20 @@ $files = $dbh->query('SELECT * FROM `pictures`;')->fetchAll(PDO::FETCH_ASSOC);
 <?php
 
 if (!empty($_GET['pic_id'])) {
-    $q = $dbh->prepare('SELECT imagepath, pic_name as name, size FROM `pictures` WHERE id = :id', [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
-    $q->execute([':id' => $_GET['pic_id']]);
-    $result = $q->fetch();
-    ?>
+    $query = $dbh
+        ->prepare(
+            'SELECT imagepath, pic_name as name, size FROM `pictures` WHERE id = :id'
+        );
+    $query->execute([':id' => $_GET['pic_id']]);
+    $result = $query->fetch();
+?>
     <figure>
-        <img src="<?= '../' . $result['imagepath'] ?>" style="max-width: 800px;max-height: 500px;" />
+        <img src="<?= '../' . $result['imagepath'] ?>" style="max-width: 800px; max-height: 500px;" />
         <figcaption>
             File name: <?= $result['name']; ?> | File size: <?= convert($result['size']); ?>
         </figcaption>
     </figure>
-    
-    <?php
-}
 
-function convert(int $size)
-{
-    if ($size < 1024) return $size . ' b';
-    elseif ($size / 1024 < 1024) return round($size / 1024, 1) . ' kb';
-    elseif ($size / (1024 * 1024) < 1024) return round($size / (1024 * 1024), 1) . ' mb';
-    else return 're';
-}
+<?php } ?>
+
+<?php
